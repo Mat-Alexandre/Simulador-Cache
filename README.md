@@ -23,7 +23,9 @@ Além disso, serão implementados quatro algoritmos para o estudo do comportamen
 
 ### Progresso:
 - [X] Criação das memórias(Cache e RAM);
-- [X] Mapeamento Direto, Associativo por Conjunto e Totalmente Associativo;
+- [X] Mapeamento Direto;
+- [X] Mapeamento Associativo por Conjunto;
+- [X] Mapeamento Totalmente Associativo;
 - [X] QuickSort (em parte);
 - [ ] Políticas de Substituição;
 - [ ] Políticas de Escrita;
