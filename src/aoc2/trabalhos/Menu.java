@@ -160,77 +160,146 @@ public class Menu {
     public Menu(int a){
     }
 
-    public void RAMtoCache(Memoria[] RAM, Cache[] CACHE, int index) {
-        // Cópia de dados da RAM para Cache via mapeamento direto
+    public boolean inCache(Memoria[] RAM, Cache[] CACHE, int index) {
+    	int endPalavra = RAM[index].getEndereco();
+        int endBloco   = RAM[index].enderecoBloco(endPalavra, cache.getBlocos());
+        int posicao    = RAM[index].offsetBloco(endPalavra, cache.getBlocos());
+		
         switch (cache.getMapeamento()) {
-            case "Direto":
-                {
-                    // Calculando qual posição da cache o dado na RAM ocupará
-                    int endPalavra = RAM[index].getEndereco();
-                    int endBloco   = RAM[index].enderecoBloco(endPalavra, cache.getBlocos());
-                    int linhaCache = RAM[index].linhaCache(endBloco, cache.getPalavras());
-                    int posicao    = RAM[index].offsetBloco(endPalavra, cache.getBlocos());
-                    
-                    // Apenas para verificação. Retirar quando finalizado
-                    CACHE[linhaCache].setEndereco(endPalavra);
-                    
-                    int tag = (int)Math.ceil(endBloco/cache.getPalavras());
-                    // Verificar se o bloco já está na cache
-                    if(CACHE[linhaCache].getTag() != tag) {
-                    	// Validando
-                        CACHE[linhaCache].setTag(endBloco, cache.getPalavras());
-                        CACHE[linhaCache].setValidade(true);
-                    }else {
-                    	System.out.println("HIT");
-                    }
-                    
-                    // Copiar os dados do bloco
-                    int indexAux = index - posicao;
-                    for(int i = 0; i < cache.getBlocos(); i++){
-                        CACHE[linhaCache].setDado(RAM[indexAux + i].getDado(), i);
-                    }
-                    break;
+        case "Direto":
+        {
+        	// Mapeamento direto verificar a tag e validade
+        	// Verificar qual linha na cache o dado está
+        	int linha = RAM[index].linhaCache(endBloco, cache.getBlocos());
+        	
+        	// Verificando a tag do endereço
+        	int tag = (int)Math.ceil(endBloco/cache.getPalavras());
+        	
+        	if(CACHE[linha].getValidade() == 1) {
+        		if(CACHE[linha].getTag() != tag) {
+        			// MISS
+        			// Buscar dados na RAM
+        			toCache(RAM, CACHE, index);
+        			return false;
+        		}else {
+        			//Ler posição (hit)	
+        			return true;
+        		}
+        	}else {
+        		// MISS
+        		// Buscar dados na RAM
+        		toCache(RAM, CACHE, index);
+        		return false;
+        	}
+        }	
+        case "Associativo":
+        {
+        	// | END. BLOCO | OFFSET |
+        	// | TAG | CONJ | OFFSET |
+        	int qtdConjuntos = cache.getPalavras()/cache.getAssociatividade();
+            int conjunto     = (int)Math.floorMod(endBloco, qtdConjuntos);
+            int linha        = conjunto*cache.getAssociatividade();
+            int tag          = (int)Math.ceil(endBloco/qtdConjuntos);
+            int tentativas   = 0;
+           
+            while(tentativas < cache.getAssociatividade()){
+                if(CACHE[linha].getValidade() == 1 && CACHE[linha].getTag() == tag){
+                    return true;
                 }
-            case "Associativo":
-                {
-                    int endPalavra  = RAM[index].getEndereco();
-                    int endBloco    = RAM[index].enderecoBloco(endPalavra, cache.getBlocos());
-                    int via         = RAM[index].getConjunto(endBloco, cache.getAssociatividade());
-                    int posicao     = RAM[index].offsetBloco(endPalavra, cache.getBlocos());
-                    
-                    int conjuntos   = cache.getPalavras()/cache.getAssociatividade();
-                    int linhaCache  = 0 + via*conjuntos;
-                    boolean escrito = false;
-                    
-                    while(linhaCache < (via+1)*conjuntos && escrito == false){
-                        if(CACHE[linhaCache].validade == false){
-                        	// apenas para verificação. Retirar quando finalizado
-                            CACHE[linhaCache].setEndereco(endPalavra);
-
-                            // TAG (a.c.) = end. bloco / (palavras por vias)
-                            CACHE[linhaCache].setTag(endBloco, conjuntos);
-                            CACHE[linhaCache].setValidade(true);
-                            
-                            // Copiando os dados do bloco
-                            int indexAux = index - posicao;
-                            for(int i = 0; i < cache.getBlocos(); i++){
-                                CACHE[linhaCache].setDado(RAM[indexAux + i].getDado(), i);
-                            }
-                            escrito = true;
-                        }    
-                        linhaCache++;
-                    }
-                    if(escrito == false){
-                        System.out.println("Substituição");
-                    }
-                    break;
+                tentativas++;
+                linha++;
+            }
+            // MISS
+    		// Buscar dados na RAM
+            toCache(RAM, CACHE, index);
+            return false;   
+        }
+        case "Total":
+        {
+        	int linha = 0;
+        	int tag   = (int)Math.ceil(endBloco/1);
+        	
+        	while(linha < cache.getPalavras()){
+        		//Ler posição (hit)
+        		if(CACHE[linha].getValidade() == 1 && CACHE[linha].getTag() == tag)
+            		return true;
+        		linha++;
+            }
+        	if(linha == cache.getPalavras()) {
+        		// MISS
+        		// Buscar dados na RAM
+        		toCache(RAM, CACHE, index);
+        		return false;
+        	}
+        }
+        default:
+        	return false;
+        }
+    }
+    
+    public void toCache(Memoria[] RAM, Cache[] CACHE, int index) {
+    	int endPalavra = RAM[index].getEndereco();
+        int endBloco   = RAM[index].enderecoBloco(endPalavra, cache.getBlocos());
+        int posicao    = RAM[index].offsetBloco(endPalavra, cache.getBlocos());
+		
+    	switch(cache.getMapeamento()) {
+	    	case "Direto":
+	    	{
+	    		int linhaCache = RAM[index].linhaCache(endBloco, cache.getPalavras());
+	    		//
+	    		CACHE[linhaCache].setEndereco(endPalavra);
+	    		//
+	    		CACHE[linhaCache].setValidade(true);
+	    		CACHE[linhaCache].setTag(endBloco, cache.getPalavras());
+	    		
+	    		// Copiar os dados do bloco
+	            int indexAux = index - posicao;
+	            for(int i = 0; i < cache.getBlocos(); i++){
+	                CACHE[linhaCache].setDado(RAM[indexAux + i].getDado(), i);
+	            }
+	    		break;
+	    	}
+	    	case "Associativo":
+	    	{
+	    		int qtdConjuntos = cache.getPalavras()/cache.getAssociatividade();
+	            int conjunto     = (int)Math.floorMod(endBloco, qtdConjuntos);
+	            int linha        = conjunto*cache.getAssociatividade();
+	            int tentativas   = 0;
+	            boolean escrito  = false;
+	           
+	            System.out.println("End. Palavra: "+endPalavra);
+	            System.out.println("End. Bloc: "+endBloco);
+	            System.out.println("Posição: "+posicao);
+	            System.out.println("Qtd Blocos: "+cache.getBlocos());
+	            System.out.println("Conjunto: "+conjunto);
+	            System.out.println("Linha: "+linha+"\n");
+	            while(tentativas < cache.getAssociatividade() && escrito == false){
+                    if(CACHE[linha].validade == false){
+                        // TAG (a.c.) = end. bloco / (conjunto)
+                        CACHE[linha].setTag(endBloco, qtdConjuntos);
+                        CACHE[linha].setValidade(true);
+                        //
+        	    		CACHE[linha].setEndereco(endPalavra);
+        	    		//
+                        
+                        // Copiando os dados do bloco
+                        int indexAux = index - posicao;
+                        for(int i = 0; i < cache.getBlocos(); i++){        	
+//                            CACHE[linha].setDado(RAM[index + i].getDado(), i);
+                        }
+                        escrito = true;
+                    }    
+                    linha++;
                 }
-            case "Total":
-            	int endPalavra = RAM[index].getEndereco();
-                int endBloco   = RAM[index].enderecoBloco(endPalavra, cache.getBlocos());
-                int posicao    = RAM[index].offsetBloco(endPalavra, cache.getBlocos());
-                
-                int linhaCache = 0;
+                if(escrito == false){
+                    System.out.println("Substituição");
+                }
+	    		break;
+	    	}
+	    		
+	    	case "Total":
+	    	{
+	    		int linhaCache = 0;
                 boolean escrito = false;
                 
                 // Enquanto for menor que o tamanho da cache.
@@ -242,7 +311,10 @@ public class Menu {
                         // TAG (t.a.) = end. bloco
                         CACHE[linhaCache].setTag(endBloco, 1);
                         CACHE[linhaCache].setValidade(true);
-                        
+                        //
+        	    		CACHE[linhaCache].setEndereco(endPalavra);
+        	    		//
+        	    		
                         // Copiando os dados do bloco
                         int indexAux = index - posicao;
                         for(int i = 0; i < cache.getBlocos(); i++){
@@ -255,12 +327,19 @@ public class Menu {
                 if(escrito == false){
                     System.out.println("Substituição");
                 }
-                break;
-            default:
-                break;
-        }
+	    		break;	
+	    	}
+    	}
     }
 
+    private void toRAM(Memoria[] RAM, Cache[] CACHE, int index) {
+    	
+    }
+
+    public void verifyCache(int index) {
+    	
+    }
+    
     public void showCache(Cache[] CACHE) {
         System.out.println("-------------------------CACHE--------------------------");
         System.out.println("| LINHA | VAL | SUJO |    TAG   |  ENDERECO |       DADOS      |");
@@ -303,7 +382,8 @@ public class Menu {
 
     public void startMems(Memoria[] RAM, Cache[] CACHE, int capacidade, Random rng) {
         for(int i = 0; i < capacidade; i++) {
-            RAM[i] = new Memoria(i, rng.nextInt(capacidade));
+        	int dado = rng.nextInt(capacidade);
+            RAM[i] = new Memoria(i, dado);
         }
 
         for(int i = 0; i < cache.getPalavras(); i++) {

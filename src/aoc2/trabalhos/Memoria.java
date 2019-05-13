@@ -7,7 +7,7 @@ public class Memoria {
     public Memoria(int endereco, int dado) {
         this.dado = new int[1];
         this.dado[0] = dado;
-        this.endereco = 214748364 + endereco;
+        this.endereco = 6960 + endereco;
 //		this.endereco = String.format("%032d", Long.valueOf(Long.toBinaryString(endereco)));
     }
 
@@ -25,8 +25,8 @@ public class Memoria {
         return endereco;
     }
 
-    public void setDado(int[] dado) {
-        this.dado = dado;
+    public void setDado(int dado, int posicao) {
+        this.dado[posicao] = dado;
     }
 
     public void setEndereco(int endereco) {
@@ -47,11 +47,6 @@ public class Memoria {
     
     public int getConjunto(int endBloco, int vias){
         return Math.floorMod(endBloco, vias);
-    }
-
-    public void setDado(int dado, int posicao) {
-        // TODO Auto-generated method stub
-
     }
 
 }

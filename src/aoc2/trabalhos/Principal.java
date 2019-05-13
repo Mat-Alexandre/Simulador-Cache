@@ -17,14 +17,18 @@ public class Principal {
         // Inicialização das memórias
         menu.startMems(RAM, CACHE, capacidade, rng);
 
-        // Atribuindo os valores da RAM à CACHE
-        // Método deve ser chamado pelo algorítmo a ser testado
-        QuickSort q = new QuickSort(RAM, CACHE, menu);
-        q.Sort(0, RAM.length-1);
-        
+        // Aplicação do algoritmo
+        for(int i = 0; i < capacidade; i++) {
+        	menu.toCache(RAM, CACHE, i);	
+        }
         // Imprimindo a cache
-        // menu.showCache(CACHE);
+        menu.showCache(CACHE);
 
+//        QuickSort q = new QuickSort(RAM, CACHE, menu);
+//        q.Sort(0, RAM.length-1);
+//        
+//        menu.showCache(CACHE);
+//        System.out.println("Total: " + (q.hit + q.miss) + "\nHit: "+q.hit+"\nMiss: "+q.miss);
         // Campos da cache
 //        menu.cacheBits();
     }

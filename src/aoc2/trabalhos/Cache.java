@@ -11,11 +11,6 @@ public class Cache extends Memoria {
         this.validade = false;
         this.sujo = false;
     }
-    
-    @Override
-    public void setDado(int dado, int posicao) {
-        this.dado[posicao] = dado;
-    }
 
     @Override
     public String toString() {
