@@ -18,18 +18,19 @@ public class Principal {
         menu.startMems(RAM, CACHE, capacidade, rng);
 
         // Aplicação do algoritmo
-        for(int i = 0; i < capacidade; i++) {
+        for(int i = 0; i < 6; i++) {
         	menu.toCache(RAM, CACHE, i);	
         }
         // Imprimindo a cache
         menu.showCache(CACHE);
+        
+        // Campos da cache
+        menu.cacheBits();
 
 //        QuickSort q = new QuickSort(RAM, CACHE, menu);
 //        q.Sort(0, RAM.length-1);
 //        
 //        menu.showCache(CACHE);
 //        System.out.println("Total: " + (q.hit + q.miss) + "\nHit: "+q.hit+"\nMiss: "+q.miss);
-        // Campos da cache
-//        menu.cacheBits();
     }
 }

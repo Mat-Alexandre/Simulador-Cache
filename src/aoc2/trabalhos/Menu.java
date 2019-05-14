@@ -42,7 +42,7 @@ public class Menu {
                 p = 512;
                 break;
             default:
-                System.out.println("Opção invlida");
+                System.out.println("OpÃ§Ã£o invlida");
                 break;
         }
 
@@ -76,7 +76,7 @@ public class Menu {
                 b = 32;
                 break;
             default:
-                System.out.println("Opção invlida");
+                System.out.println("OpÃ§Ã£o invlida");
                 break;
         }
 
@@ -107,7 +107,7 @@ public class Menu {
                     a = 8;
                     break;
                 default:
-                    System.out.println("Opção inválida");
+                    System.out.println("OpÃ§Ã£o invÃ¡lida");
                     break;
                 }
                 break;
@@ -115,11 +115,11 @@ public class Menu {
                 m = 3;
                 break;
             default:
-                System.out.println("Opção inválida");
+                System.out.println("OpÃ§Ã£o invÃ¡lida");
                 break;
         }
 
-        System.out.println("Política de SUBSTITUIÇÃO:");
+        System.out.println("PolÃ­tica de SUBSTITUIÃ‡ÃƒO:");
         System.out.println("(1) LRU\n(2) LFU\n(3) FIFO");
 
         op = sc.nextInt();
@@ -132,11 +132,11 @@ public class Menu {
                 s = 2;
                 break;
             default:
-                System.out.println("Opção inválida");
+                System.out.println("OpÃ§Ã£o invÃ¡lida");
                 break;
         }
 
-        System.out.println("Política de ESCRITA:");
+        System.out.println("PolÃ­tica de ESCRITA:");
         System.out.println("(1) Write-Through\n(2) Write-Back");
 
         op = sc.nextInt();
@@ -149,7 +149,7 @@ public class Menu {
                 e = 2;
                 break;
             default:
-                System.out.println("Opção inválida");
+                System.out.println("OpÃ§Ã£o invÃ¡lida");
                 break;
         }
 
@@ -169,10 +169,10 @@ public class Menu {
         case "Direto":
         {
         	// Mapeamento direto verificar a tag e validade
-        	// Verificar qual linha na cache o dado está
+        	// Verificar qual linha na cache o dado estÃ¡
         	int linha = RAM[index].linhaCache(endBloco, cache.getBlocos());
         	
-        	// Verificando a tag do endereço
+        	// Verificando a tag do endereÃ§o
         	int tag = (int)Math.ceil(endBloco/cache.getPalavras());
         	
         	if(CACHE[linha].getValidade() == 1) {
@@ -182,7 +182,7 @@ public class Menu {
         			toCache(RAM, CACHE, index);
         			return false;
         		}else {
-        			//Ler posição (hit)	
+        			//Ler posiÃ§Ã£o (hit)	
         			return true;
         		}
         	}else {
@@ -220,7 +220,7 @@ public class Menu {
         	int tag   = (int)Math.ceil(endBloco/1);
         	
         	while(linha < cache.getPalavras()){
-        		//Ler posição (hit)
+        		//Ler posiÃ§Ã£o (hit)
         		if(CACHE[linha].getValidade() == 1 && CACHE[linha].getTag() == tag)
             		return true;
         		linha++;
@@ -241,22 +241,34 @@ public class Menu {
     	int endPalavra = RAM[index].getEndereco();
         int endBloco   = RAM[index].enderecoBloco(endPalavra, cache.getBlocos());
         int posicao    = RAM[index].offsetBloco(endPalavra, cache.getBlocos());
-		
+        boolean escrito  = false;
+        
     	switch(cache.getMapeamento()) {
 	    	case "Direto":
 	    	{
-	    		int linhaCache = RAM[index].linhaCache(endBloco, cache.getPalavras());
-	    		//
-	    		CACHE[linhaCache].setEndereco(endPalavra);
-	    		//
-	    		CACHE[linhaCache].setValidade(true);
-	    		CACHE[linhaCache].setTag(endBloco, cache.getPalavras());
-	    		
-	    		// Copiar os dados do bloco
-	            int indexAux = index - posicao;
-	            for(int i = 0; i < cache.getBlocos(); i++){
-	                CACHE[linhaCache].setDado(RAM[indexAux + i].getDado(), i);
-	            }
+	    		int linha = RAM[index].linhaCache(endBloco, cache.getPalavras());
+	    		int aux = endPalavra - (endBloco*cache.getBlocos());
+	    		int tag = (int)Math.ceil(endBloco/cache.getPalavras());
+
+	    		if(CACHE[linha].validade == true) {
+	    			if(CACHE[linha].getTag() == tag) {
+	    				escrito = true;
+	    			}
+	    		}else {
+	    			// Endereço para verificação
+		    		CACHE[linha].setEndereco(endPalavra);
+		    		
+		    		escrito = true;
+		    		CACHE[linha].setValidade(true);
+		    		CACHE[linha].setTag(endBloco, cache.getPalavras());
+		    		escrito = true;
+		            for(int i = 0; i < cache.getBlocos(); i++){
+		                CACHE[linha].setDado(RAM[index - aux + i].getDado(), i);
+		            }
+	    		}
+	    		if(escrito == false) {
+	    			System.out.println("Substituição");
+	    		}
 	    		break;
 	    	}
 	    	case "Associativo":
@@ -265,64 +277,69 @@ public class Menu {
 	            int conjunto     = (int)Math.floorMod(endBloco, qtdConjuntos);
 	            int linha        = conjunto*cache.getAssociatividade();
 	            int tentativas   = 0;
-	            boolean escrito  = false;
-	           
-	            System.out.println("End. Palavra: "+endPalavra);
-	            System.out.println("End. Bloc: "+endBloco);
-	            System.out.println("Posição: "+posicao);
-	            System.out.println("Qtd Blocos: "+cache.getBlocos());
-	            System.out.println("Conjunto: "+conjunto);
-	            System.out.println("Linha: "+linha+"\n");
-	            while(tentativas < cache.getAssociatividade() && escrito == false){
-                    if(CACHE[linha].validade == false){
-                        // TAG (a.c.) = end. bloco / (conjunto)
-                        CACHE[linha].setTag(endBloco, qtdConjuntos);
-                        CACHE[linha].setValidade(true);
-                        //
-        	    		CACHE[linha].setEndereco(endPalavra);
-        	    		//
-                        
-                        // Copiando os dados do bloco
-                        int indexAux = index - posicao;
-                        for(int i = 0; i < cache.getBlocos(); i++){        	
-//                            CACHE[linha].setDado(RAM[index + i].getDado(), i);
-                        }
-                        escrito = true;
-                    }    
-                    linha++;
-                }
-                if(escrito == false){
-                    System.out.println("Substituição");
-                }
+	            int tag          = (int)Math.ceil((endBloco/qtdConjuntos));
+	            int aux          = endPalavra - (endBloco*cache.getBlocos());
+	            int linhaAux     = linha;
+	            
+	            while(tentativas < cache.getAssociatividade() && escrito == false) {
+	            	if(CACHE[linha].validade == true) {
+	            		if(tag == CACHE[linha].getTag()) {
+	            			escrito = true;
+	            		}
+	            	}
+	            	linha++;
+	            	tentativas++;
+	            }
+	            
+	            while(CACHE[linhaAux].validade == true && linhaAux < cache.getAssociatividade() && escrito == false) {
+	            	linhaAux++;
+	            }
+	            if(CACHE[linhaAux].validade == false) {
+	            	// Endereço para verificação
+		    		CACHE[linhaAux].setEndereco(endPalavra);
+		    		
+	            	CACHE[linhaAux].setTag(endBloco, qtdConjuntos);
+	            	CACHE[linhaAux].setValidade(true);
+	            	escrito = true;
+	            	for(int j = 0; j < cache.getBlocos(); j++) {
+	            		CACHE[linhaAux].setDado(RAM[index - aux + j].getDado(), j);
+	            	}
+	            }
+	            if(escrito ==  false) {
+	            	System.out.println("Substituição");
+	            }
 	    		break;
 	    	}
 	    		
 	    	case "Total":
 	    	{
-	    		int linhaCache = 0;
-                boolean escrito = false;
-                
+	    		int linha    = 0;
+	    		int linhaAux = linha;
+                int tag      = (int)Math.ceil(endBloco);
+                int aux      = endPalavra - (endBloco*cache.getBlocos());
+	            
                 // Enquanto for menor que o tamanho da cache.
-                while(linhaCache < cache.getPalavras() && escrito == false){
-                    if(CACHE[linhaCache].validade == false){
-                    	// apenas para verificação. Retirar quando finalizado
-                        CACHE[linhaCache].setEndereco(endPalavra);
-
-                        // TAG (t.a.) = end. bloco
-                        CACHE[linhaCache].setTag(endBloco, 1);
-                        CACHE[linhaCache].setValidade(true);
-                        //
-        	    		CACHE[linhaCache].setEndereco(endPalavra);
-        	    		//
-        	    		
-                        // Copiando os dados do bloco
-                        int indexAux = index - posicao;
-                        for(int i = 0; i < cache.getBlocos(); i++){
-                            CACHE[linhaCache].setDado(RAM[indexAux + i].getDado(), i);
-                        }
-                        escrito = true;
-                    }    
-                    linhaCache++;
+                while(linha < cache.getPalavras() && escrito == false){
+                    if(CACHE[linha].validade == true) {
+                    	if(CACHE[linha].getTag() == tag) {
+                    		escrito = true;
+                    	}
+                    }
+                    linha++;
+                }
+                while(CACHE[linhaAux].validade == true && linhaAux < cache.getPalavras() && escrito == false) {
+	            	linhaAux++;
+	            }
+                if(CACHE[linhaAux].validade == false) {
+                	// Endereço para verificação
+		    		CACHE[linhaAux].setEndereco(endPalavra);
+		    		
+                    CACHE[linhaAux].setTag(endBloco, 1);
+                    CACHE[linhaAux].setValidade(true);
+                    escrito = true;
+    	    		for(int i = 0; i < cache.getBlocos(); i++){
+                        CACHE[linhaAux].setDado(RAM[index - aux + i].getDado(), i);
+                    }
                 }
                 if(escrito == false){
                     System.out.println("Substituição");
@@ -357,7 +374,7 @@ public class Menu {
         		bitsOb = (int)(Math.log(this.cache.getBlocos()) / Math.log(2));
                 int bitsInd = (int)(Math.log(this.cache.getPalavras()) / Math.log(2));
                 System.out.println("Offset Bloco:\t" + bitsOb);
-                System.out.println("Índice:\t" + bitsInd);
+                System.out.println("Ã�ndice:\t" + bitsInd);
                 System.out.println("TAG:\t\t" + (32 - bitsInd - bitsOb));
         		break;
         	case "Associativo":
