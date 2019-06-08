@@ -2,9 +2,26 @@ package aoc2.trabalhos;
 
 import java.util.Random;
 import java.util.Scanner;
-//import javax.swing.SpringLayout;
 
 public class Menu {
+	/*
+	 * Classe que possui os principai métodos para modificação e verificação
+	 * de dados nas memórias.
+	 * 
+	 * Construtor com parâmetro é usado somente para a GUI.
+	 * 
+	 * O Construtor utilizado para execução em linha de comando recebe todas as informações
+	 * necessárias para a simulação da cache.
+	 * 
+	 * O método:
+	 * 	startMems>	inicia as memórias Cache e RAM.
+	 * 	inCache>	verifica se um dado na posição 'index' está presente na memória cache. Retorna true se
+	 * estiver e se não estiver, chama o método toCache() e retorna false.
+	 * 	toCache>	responsável por armazenar na Cache o dado na posição 'index'. Caso o local ja esteja sendo ocupado por
+	 * algum outro valor, deverá ser executado a política de substituição.
+	 * 	showCache>	imprime no console a linha, validade, bit sujo, tag, endereço e dados de cada posição da Cache.
+	 * 	cacheBits>	imprime no console a quantidade de bits para representar cada informação da cache.
+	 */
 	
     public CacheInfo cache;
 
@@ -157,20 +174,31 @@ public class Menu {
         sc.close();
     }
 
-    public Menu(int a){
+    public Menu(String GUI){
+    	
     }
 
+    public void startMems(Memoria[] RAM, Cache[] CACHE, int capacidade, Random rng) {
+        for(int i = 0; i < capacidade; i++) {
+        	int dado = rng.nextInt(capacidade);
+            RAM[i] = new Memoria(i, dado);
+        }
+
+        for(int i = 0; i < cache.getPalavras(); i++) {
+            CACHE[i] = new Cache(cache.getBlocos());
+        }
+    }
+    
     public boolean inCache(Memoria[] RAM, Cache[] CACHE, int index) {
     	int endPalavra = RAM[index].getEndereco();
-        int endBloco   = RAM[index].enderecoBloco(endPalavra, cache.getBlocos());
-        int posicao    = RAM[index].offsetBloco(endPalavra, cache.getBlocos());
-		
+        int endBloco   = CACHE[index].enderecoBloco(endPalavra, cache.getBlocos());
+        
         switch (cache.getMapeamento()) {
         case "Direto":
         {
         	// Mapeamento direto verificar a tag e validade
         	// Verificar qual linha na cache o dado estÃ¡
-        	int linha = RAM[index].linhaCache(endBloco, cache.getBlocos());
+        	int linha = CACHE[index].linhaCache(endBloco, cache.getBlocos());
         	
         	// Verificando a tag do endereÃ§o
         	int tag = (int)Math.ceil(endBloco/cache.getPalavras());
@@ -239,14 +267,13 @@ public class Menu {
     
     public void toCache(Memoria[] RAM, Cache[] CACHE, int index) {
     	int endPalavra = RAM[index].getEndereco();
-        int endBloco   = RAM[index].enderecoBloco(endPalavra, cache.getBlocos());
-        int posicao    = RAM[index].offsetBloco(endPalavra, cache.getBlocos());
+        int endBloco   = CACHE[index].enderecoBloco(endPalavra, cache.getBlocos());
         boolean escrito  = false;
         
     	switch(cache.getMapeamento()) {
 	    	case "Direto":
 	    	{
-	    		int linha = RAM[index].linhaCache(endBloco, cache.getPalavras());
+	    		int linha = CACHE[index].linhaCache(endBloco, cache.getPalavras());
 	    		int aux = endPalavra - (endBloco*cache.getBlocos());
 	    		int tag = (int)Math.ceil(endBloco/cache.getPalavras());
 
@@ -348,14 +375,6 @@ public class Menu {
 	    	}
     	}
     }
-
-    private void toRAM(Memoria[] RAM, Cache[] CACHE, int index) {
-    	
-    }
-
-    public void verifyCache(int index) {
-    	
-    }
     
     public void showCache(Cache[] CACHE) {
         System.out.println("-------------------------CACHE--------------------------");
@@ -395,17 +414,6 @@ public class Menu {
         		break;
         }
         
-    }
-
-    public void startMems(Memoria[] RAM, Cache[] CACHE, int capacidade, Random rng) {
-        for(int i = 0; i < capacidade; i++) {
-        	int dado = rng.nextInt(capacidade);
-            RAM[i] = new Memoria(i, dado);
-        }
-
-        for(int i = 0; i < cache.getPalavras(); i++) {
-            CACHE[i] = new Cache(cache.getBlocos());
-        }
     }
 
 }

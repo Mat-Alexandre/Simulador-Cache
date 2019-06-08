@@ -1,15 +1,18 @@
 package aoc2.trabalhos;
 
 public class CacheInfo {
-	// Quantidade de palavras na cache (i.e linhas da cache) 
 	private int palavras;
-	// NÃºmero de palavras por bloco
 	private int blocos;
 	private String mapeamento;
 	private int associatividade;
 	private String substituicao;
 	private String escrita;
 	
+	/*
+	 * Classe responsável por guardar informaçoes a respeito da cache.
+	 * A quantidade de linhas na cache (palavras), palavras por bloco (bloco), tipo do mapeamento,
+	 * associatividade, pol. de substituição e escrita.
+	 */
 	
 	public int getPalavras() {
 		return palavras;

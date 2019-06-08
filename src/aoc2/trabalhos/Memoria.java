@@ -3,6 +3,12 @@ package aoc2.trabalhos;
 public class Memoria {
     protected int dado[];
     protected int endereco;
+    
+    /*
+     * Classe pai da classe Cache.
+     * A memória RAM e CACHE possuem fatores em comum, como: endereço e dado.
+     * 
+     */
 
     public Memoria(int endereco, int dado) {
         this.dado = new int[1];
@@ -14,7 +20,7 @@ public class Memoria {
     public Memoria() {
         dado = new int[1];
         dado[0] = 0;
-        endereco = 0; //String.format("%032d", Long.valueOf(Long.toBinaryString(0)));
+        endereco = 0;
     }
 
     public int getDado() {
@@ -31,22 +37,6 @@ public class Memoria {
 
     public void setEndereco(int endereco) {
         this.endereco = endereco;
-    }
-
-    public int enderecoBloco(int endPalavra, int numPalBlocos) {
-        return Math.floorDiv(endPalavra, numPalBlocos);
-    }
-
-    public int linhaCache(int endBloco, int tamCache) {
-        return Math.floorMod(endBloco, tamCache);
-    }
-
-    public int offsetBloco(int endPalavra, int numPalBlocos) {
-        return Math.floorMod(endPalavra, numPalBlocos);
-    }
-    
-    public int getConjunto(int endBloco, int vias){
-        return Math.floorMod(endBloco, vias);
     }
 
 }

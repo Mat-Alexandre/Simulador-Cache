@@ -5,6 +5,13 @@ import java.util.Random;
 public class Principal {
 
     public static void main(String args[]) {
+    	/*
+    	 * Classe principal para execução do simulador.
+    	 * 
+    	 * As memórias Cache e RAM são arrays de suas respectivas classes.
+    	 * A capacidade da RAM é predeterminada pelo programa, enquanto a da Cache pode ser escolhida pelo usuário.
+    	 * 
+    	 */
         Random rng          = new Random();
         int capacidade      = 16;// * 8 * 1024;
 
