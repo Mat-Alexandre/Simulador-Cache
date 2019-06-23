@@ -27,9 +27,9 @@ Além disso, serão implementados quatro algoritmos para o estudo do comportamen
 - [X] Mapeamento Associativo por Conjunto;
 - [X] Mapeamento Totalmente Associativo;
 - [X] QuickSort (em parte);
-- [ ] Políticas de Substituição;
+- [x] Políticas de Substituição;
 - [ ] Políticas de Escrita;
-- [ ] SelectionSort;
-- [ ] BubbleSort;
+- [x] SelectionSort;
+- [x] BubbleSort;
 - [ ] Soma de vetores;
-- [ ] Interface Gráfica;
+- [x] Interface Gráfica;
